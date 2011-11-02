@@ -23,7 +23,7 @@ INFO_TPL = \
 u"""Locker %(lockerid)d was successfully reserved for
 %(fullname)s (%(username)s)."""
 SYSTEM_ENCODING = sys.getfilesystemencoding()
-FINGER_FULLNAME_PATT = re.compile("(?:In real life|Name): (.+?)$", re.MULTILINE)
+USTAT_FULLNAME_PATT = re.compile("^Full name:\s*(.+?)$", re.MULTILINE)
 
 
 BACHELOR_INFO = \
@@ -49,14 +49,14 @@ def validate_username(value):
 	
 
 def get_fullname(username):
-	p = subprocess.Popen(["finger", username], stdout=subprocess.PIPE,
+	p = subprocess.Popen(["/local/bin/ustat", username], stdout=subprocess.PIPE,
 			stderr=subprocess.STDOUT)
 	output = "".join(p.stdout.readlines())
 	retcode = p.wait()
 	if retcode == 0:
-		m = FINGER_FULLNAME_PATT.search(output)
+		m = USTAT_FULLNAME_PATT.search(output)
 		if m:
-			return unicode(m.group(1), SYSTEM_ENCODING)
+			return unicode(m.group(1), 'latin-1')
 	raise ValueError(u"Could not find full name for user: %s." % username)
 
 
@@ -109,8 +109,8 @@ class LockerReservationForm(form.AddForm):
 					return self.template()
 
 			# Make sure anonymous users cannot add multiple lockers.
-			if context.portal_membership.isAnonymousUser():
-				lockerreservation.validate_unique_username(context, username)
+			# if context.portal_membership.isAnonymousUser():
+			# 	lockerreservation.validate_unique_username(context, username)
 		except lockerreservation.LockerValidationError, e:
 			IStatusMessage(self.request).addStatusMessage(unicode(e),
 					type='error')
@@ -158,12 +158,12 @@ class LockerReservationForm(form.AddForm):
 					username=username, lockerid=lockerid,
 					fullname=fullname)
 
-			context.MailHost.secureSend(
-					message, to_address, from_address,
+			context.MailHost.send(
+					message,
+                    to_address,
+                    from_address,
 					subject = subject,
-					charset = email_charset,
-					debug = False,
-					From = from_full)
+                    charset = SYSTEM_ENCODING)
 
 			info += " A confirmation mail has been sent to your UiO email address."
 

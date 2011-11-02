@@ -103,7 +103,7 @@ LockerRegistrySchema = folder.ATFolderSchema.copy() + atapi.Schema((
 		),
 
 	atapi.LinesField("masterlockers",
-		required = True,
+		required = False,
 		searchable = False,
 		storage = atapi.AnnotationStorage(),
 		widget = atapi.LinesWidget(

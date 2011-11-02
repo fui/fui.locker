@@ -37,7 +37,8 @@ class LockerRegistryOverview(BrowserView):
 					username = item.Title(),
 					email = "%s@ulrik.uio.no" % item.Title(),
 					area = area,
-					lockerid = item.getLockerid()))
+					lockerid = item.getLockerid(),
+                    paid = item.getPaid()))
 		return r
 
 

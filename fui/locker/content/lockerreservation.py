@@ -17,6 +17,8 @@ USERNAME_TITLE = u"UiO username"
 USERNAME_DESCRIPTION = u"Must be a valid UiO username."
 LOCKERID_TITLE = u"Locker id"
 LOCKERID_DESCRIPTION = u"The id/number of the locker."
+PAID_TITLE = u"Has paid?"
+PAID_DESCRIPTION = u"Whether the user has paid the locker fee."
 
 ALREADY_RESERVER_MSG = \
 u"""There is already a locker reserved by the '%s' user. If this is your
@@ -35,6 +37,13 @@ schema = schemata.ATContentTypeSchema.copy() + atapi.Schema((
 			label = LOCKERID_TITLE,
 			description = LOCKERID_DESCRIPTION),
 		),
+    atapi.BooleanField("paid",
+        required = False,
+        searchable = False,
+        widget = atapi.BooleanWidget(
+            label = PAID_TITLE,
+            description = PAID_DESCRIPTION)
+        ),
 ))
 
 # Just reuse the 'title' field for the username
@@ -164,7 +173,6 @@ class LockerReservation(base.ATCTContent):
 		parent = self.aq_inner.aq_parent
 		try:
 			validate_username(username)
-			validate_unique_username(parent, username, self.getId())
 		except LockerValidationError, e:
 			return unicode(e)
 		return None
